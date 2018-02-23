@@ -28,7 +28,8 @@ object ProfileMain {
 
   val isWindows: Boolean = System.getProperty("os.name").startsWith("Windows")
 
-  def printAggResults(testConfig: TestConfig, results: Seq[PhaseResults], limit: Double): Unit = {
+  def printAggResults(resultToPrint: TextRenderer.Result, limit: Double): Unit = {
+	  val results = resultToPrint.rawData
 
     val size = (results.size * limit).toInt
     case class Distribution(min: Double, max: Double, mean: Double) {
@@ -65,7 +66,7 @@ object ProfileMain {
     val allIdleMsStr         = allIdleAvg.formatted(6, 2)
     println(
       "%25s\t%4s\t%25s\t%25s\t%25s\t%25s\t%25s"
-        .format(testConfig.id,
+        .format(resultToPrint.id,
                 size,
                 wallMsStr,
                 allWallMsStr,
@@ -253,7 +254,7 @@ object ProfileMain {
     val programArgs =
       s"++2.12.3=$mkPackPath" :: (
         List("Compile", "Test") map { cfg => // sbt woe
-          s"""set scalacOptions in $cfg ++= List($extraArgsStr"-Yprofile-destination","$runPlan.profileOutputFile")"""
+          s"""set scalacOptions in $cfg ++= List($extraArgsStr"-Yprofile-destination","${runPlan.profileOutputFile}")"""
         }
       )
 

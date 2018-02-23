@@ -8,8 +8,16 @@ import org.perftester.results.rows.MainPhaseRow
 import scala.collection.mutable
 
 object TextRenderer {
-  def outputTextResults(envConfig: EnvironmentConfig,
-                        results: Seq[(TestConfig, RunResult)]): Unit = {
+	case class Result(id: String, rawData: Seq[PhaseResults], phases: Set[String])
+
+	def outputTextResults(envConfig: EnvironmentConfig,
+	                      results: Seq[(TestConfig, RunResult)]): Unit =
+		outputTextResults(envConfig.iterations, results.map {
+			case (config, run) => Result(config.id, run.rawData, run.phases)
+		})
+
+  def outputTextResults(iterations: Int,
+                        results: Seq[Result]): Unit = {
     def heading(title: String) {
       println(
         f"-----\n$title\n${"Run Name"}%25s\t${"Wall time (ms)"}%25s\t${"All Wall time (ms)"}%25s\t${"CPU(ms)"}%25s\t${"Idle time (ms)"}%25s\t${"Allocated(MBs)"}%25s")
@@ -49,44 +57,40 @@ object TextRenderer {
     }
 
     heading("ALL")
-    results.foreach {
-      case (config, configResult) =>
-        printAggResults(config, allPhases(configResult.rawData), 1)
-    }
+    results.foreach(r => printAggResults(r, 1.0))
     val phases: mutable.LinkedHashSet[String] =
-      results.flatMap(r => r._2.phases)(scala.collection.breakOut)
+      results.flatMap(_.phases)(scala.collection.breakOut)
 
-    if (envConfig.iterations > 10) {
-      (10 until (envConfig.iterations, 10)) foreach { i =>
+    if (iterations > 10) {
+      (10 until (iterations, 10)) foreach { i =>
         println(
           "\n---------------------------------------------------------------------------------------------------")
         println(
           "---------------------------------------------------------------------------------------------------")
         heading(s"after $i 90%")
-        results.foreach {
-          case (config, configResult) =>
-            val skipped = configResult.rawData.dropWhile(_.iterationId <= i)
-            printAggResults(config, allPhases(skipped), 0.9)
+        results.foreach { result =>
+            val skipped = result.rawData.dropWhile(_.iterationId <= i)
+            printAggResults(result, 0.9)
         }
 
         for (phase <- phases) {
           heading(s"after $i 90%, phase $phase")
-          for { (config, configResult) <- results } {
-            val skipped = configResult.rawData.filter {
+          for { result <- results } {
+            val skipped = result.rawData.filter {
               case row => row.iterationId > i && row.phaseName == phase
             }
 
-            printAggResults(config, skipped, 0.9)
+            printAggResults(result, 0.9)
           }
         }
         for (phase <- phases) {
           heading(s"after $i 90%, phase $phase no GC")
-          for { (config, configResult) <- results } {
-            val skipped = configResult.rawData.filter {
+          for { result <- results } {
+            val skipped = result.rawData.filter {
               case row => row.iterationId > i && row.phaseName == phase && row.gcTimeMS == 0
             }
 
-            printAggResults(config, skipped, 0.9)
+            printAggResults(result, 0.9)
           }
         }
       }

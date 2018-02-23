@@ -6,9 +6,8 @@ import org.perftester.TestConfig
 
 import scala.collection.SortedSet
 
-case class RunResult(testConfig: TestConfig,
+case class RunResult(id: String,
                      rawData: Seq[PhaseResults],
-                     iterations: SortedSet[Int],
                      phases: Set[String]) {
 
   rawData foreach { r =>

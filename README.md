@@ -1,16 +1,16 @@
-#ScalaC Perf tester
+# ScalaC Perf tester
 
 A utility that runs multi versions of the scalaC compiler for multiple iterations to provide performance analysis.
 
-To Use - run 
+To Use run
 
-java org.perftester.ProfileMain -s <SCALA_CHECKOUT> -a TEST_BUILD -r RESULTS_DIR --iterations ITERATIONS
+`java org.perftester.ProfileMain -s <SCALA_CHECKOUT> -a TEST_BUILD -r RESULTS_DIR --iterations ITERATIONS`
 
 Where:
- * SCALA_CHECKOUT is a scalac git checkout  e.g. /workspace/scala
- * TEST_BUILD Test compilation project (probably only works with /workspace/perf_tester/corpus/akka/)
- * RESULTS_DIR - Where to store the run results - /workspace/perf_tester/results/
- * ITERATIONS - The number of iterations to run - recommended > 30
+ * `SCALA_CHECKOUT` is a scalac git checkout  e.g. /workspace/scala
+ * `TEST_BUILD` Test compilation project (probably only works with /workspace/perf_tester/corpus/akka/)
+ * `RESULTS_DIR` - Where to store the run results - /workspace/perf_tester/results/
+ * `ITERATIONS` - The number of iterations to run - recommended > 30
  
  
 *n.b* This takes a long time to run - you also, ideally, want to run it on a stable system 
